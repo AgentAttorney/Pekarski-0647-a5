@@ -1,0 +1,36 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+class App{
+    start()
+}
+
+class MenuController{
+TextField MonetaryValueInput
+TextField SerialNumberInput
+TextField NameInput
+
+Button ConfirmButton;
+
+TableView<Item> listItem
+TableColumn<Item, Double> vals
+TableColumn<Item, String> sers
+TableColumn<Item, String> names
+
+AddItemClicked(ActionEvent event)
+ExitAppClicked(ActionEvent event)
+initialize(URL location, ResourceBundle rb)
+}
+
+class Item{
+SimpleDoubleProperty value
+SimpleStringProperty S_Number
+SimpleStringProperty name
+}
+
+class Items{
+List<Item> Serial_Items
+}
+
+
+@enduml
