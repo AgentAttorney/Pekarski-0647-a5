@@ -64,6 +64,13 @@ public class Item {
         return ret_value;
     }
 
+    public static ObservableList<Item> removeItems(ObservableList<Item> to_remove, ObservableList<Item> all) {
+        if(to_remove != null){
+            all.removeAll(to_remove);
+        }
+        return all;
+    }
+
     public String getValue() {
         return value.get();
     }

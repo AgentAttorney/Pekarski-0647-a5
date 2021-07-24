@@ -1,7 +1,10 @@
 package ucf.assignments;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -12,6 +15,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class MenuController implements Initializable {
@@ -19,15 +23,23 @@ public class MenuController implements Initializable {
     @FXML TextField MonetaryValueInput;
     @FXML TextField SerialNumberInput;
     @FXML TextField NameInput;
+    @FXML TextField SearchInput;
 
     @FXML Label ErrorSN;
 
     @FXML Button ConfirmButton;
+    @FXML Button ResetTable;
 
     @FXML private TableView<Item> listItem;
+    @FXML private TableView<Item> listItemSearched;
+
     @FXML private TableColumn<Item, String> valueList;
     @FXML private TableColumn<Item, String> SerList;
     @FXML private TableColumn<Item, String> NameList;
+
+    @FXML private TableColumn<Item, String> valueListSearch;
+    @FXML private TableColumn<Item, String> SerListSearch;
+    @FXML private TableColumn<Item, String> NameListSearch;
 
     @FXML
     public void AddItemClicked(ActionEvent event) throws IOException {
@@ -144,6 +156,37 @@ public class MenuController implements Initializable {
             listItem.refresh();
         }
     }
+    public void deleteButtonClicked(ActionEvent event){
+        ObservableList<Item> all = listItem.getItems();
+        ObservableList<Item> to_remove = listItem.getSelectionModel().getSelectedItems();
+
+        ObservableList<Item> not_removed = Item.removeItems(to_remove,all);
+        listItem.setItems(not_removed);
+
+    }
+
+    @FXML
+    public void SearchButtonClicked(ActionEvent event){
+        ObservableList<Item> search_matches = FXCollections.observableArrayList();
+        String search = SearchInput.getText().toLowerCase();
+        for(Item item: listItem.getItems()){
+            if(search.contains(item.getS_number().toLowerCase()) || search.contains(item.getName().toLowerCase())){
+                search_matches.add(item);
+            }
+        }
+        listItemSearched.getItems().addAll(search_matches);
+        listItem.setVisible(false);
+        listItemSearched.setVisible(true);
+        ResetTable.setDisable(false);
+    }
+    @FXML
+    public void ResetTableClicked(ActionEvent event){
+        ObservableList<Item> empty = FXCollections.observableArrayList();
+        listItemSearched.setItems(empty);
+        listItemSearched.setVisible(false);
+        listItem.setVisible(true);
+        ResetTable.setDisable(true);
+    }
 
     @FXML
     public void ExitAppClicked(ActionEvent event){
@@ -157,20 +200,28 @@ public class MenuController implements Initializable {
         SerList.setCellValueFactory(new PropertyValueFactory<Item,String>("S_number"));
         NameList.setCellValueFactory(new PropertyValueFactory<Item,String>("name"));
 
+        valueListSearch.setCellValueFactory(new PropertyValueFactory<Item,String>("value"));
+        SerListSearch.setCellValueFactory(new PropertyValueFactory<Item,String>("S_number"));
+        NameListSearch.setCellValueFactory(new PropertyValueFactory<Item,String>("name"));
+
         // set our table view editable and Set how each column in our table view is editable
         listItem.setEditable(true);
+        listItem.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
         //valueList.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         valueList.setCellFactory(TextFieldTableCell.forTableColumn());
         SerList.setCellFactory(TextFieldTableCell.forTableColumn());
         NameList.setCellFactory(TextFieldTableCell.forTableColumn());
 
         ConfirmButton.setDisable(true);
+        ResetTable.setDisable(true);
+        listItemSearched.setVisible(false);
 
         ErrorSN.setText("The Last SN matched an existing item, and was not added.");
         ErrorSN.setVisible(false);
 
         // return an empty list
         listItem.setItems(listItem.getItems());
-
+        listItemSearched.setItems(listItemSearched.getItems());
     }
 }
