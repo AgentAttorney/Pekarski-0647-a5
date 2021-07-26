@@ -2,13 +2,16 @@ package ucf.assignments;
 
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.text.NumberFormat;
 
 public class Item {
 
-    private SimpleStringProperty value;
-    private SimpleStringProperty S_number;
-    private SimpleStringProperty name;
+    private final SimpleStringProperty value;
+    private final SimpleStringProperty S_number;
+    private final SimpleStringProperty name;
 
     public Item(String value, String s_number, String name) {
         this.value = new SimpleStringProperty(value);
@@ -70,6 +73,61 @@ public class Item {
         }
         return all;
     }
+
+    public static ObservableList<Item> SearchCriteria(String search, ObservableList<Item> items) {
+        ObservableList<Item> search_matches = FXCollections.observableArrayList();
+
+        for(Item item: items){
+            char[] charsName = item.getName().toLowerCase().toCharArray();
+            char[] charsSN = item.getS_number().toLowerCase().toCharArray();
+            for(Character character: charsName){
+                if(search.contains(String.valueOf(character)) && (!search_matches.contains(item))){
+                    Item.addItem(search_matches,item);
+                }
+            }
+            for(Character character: charsSN){
+                if(search.contains(String.valueOf(character)) && (!search_matches.contains(item))){
+                    Item.addItem(search_matches,item);
+                }
+            }
+        }
+        return search_matches;
+    }
+
+    public static boolean changeName(Item item_selected, String new_name) {
+        boolean valid_change = Item.ValidName(new_name);
+        if(valid_change){
+            // Set the name of the item to the new name
+            item_selected.setName(new_name);
+        }
+        return valid_change;
+    }
+
+    public static boolean changeValue(Item item_selected, String raw_number) {
+        // determine if the number is a valid double
+        boolean valid_change = Item.ValidPrice(raw_number);
+        if(valid_change){
+            // set the value of the selected item to the Double value of the edited Cell,
+            // formatting it with the US currency
+            NumberFormat formatter = NumberFormat.getCurrencyInstance();
+            item_selected.setValue(formatter.format(Double.parseDouble(raw_number)));
+        }
+        return valid_change;
+    }
+
+    public static boolean changeSN(ObservableList<Item> items, Item item_selected, String new_SN) {
+        // determine whether the new SN is valid and if it does not match all other items
+        boolean valid_change = Item.ValidSN(new_SN);
+        int count = Item.NotMatchSN(items,new_SN);
+
+        // set the Serial Number of the selected item to the new item, or refresh the (old) table
+        if(count == items.size() && valid_change){
+            item_selected.setS_number(new_SN);
+            return true;
+        }
+        return false;
+    }
+
 
     public String getValue() {
         return value.get();

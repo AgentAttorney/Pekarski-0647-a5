@@ -12,9 +12,12 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -29,6 +32,7 @@ public class MenuController implements Initializable {
 
     @FXML Button ConfirmButton;
     @FXML Button ResetTable;
+    @FXML Button ValidateButton;
 
     @FXML private TableView<Item> listItem;
     @FXML private TableView<Item> listItemSearched;
@@ -107,14 +111,9 @@ public class MenuController implements Initializable {
         // Get the item selected and its new name
         Item item_selected = listItem.getSelectionModel().getSelectedItem();
         String new_name = editedCell.getNewValue();
+        boolean was_changed = Item.changeName(item_selected,new_name);
 
-        // determine if the new name is a valid name
-        boolean valid_change = Item.ValidName(new_name);
-        if(valid_change){
-            // Set the name of the item to the new name
-            item_selected.setName(editedCell.getNewValue());
-        }
-        else{
+        if(!was_changed){
             // bro this works, thank god; refresh the (old) table
             listItem.refresh();
         }
@@ -124,16 +123,9 @@ public class MenuController implements Initializable {
         // get the item selected and the raw input
         Item item_selected = listItem.getSelectionModel().getSelectedItem();
         String raw_number = editedCell.getNewValue();
+        boolean was_changed = Item.changeValue(item_selected,raw_number);
 
-        // determine if the number is a valid double
-        boolean valid_change = Item.ValidPrice(raw_number);
-        if(valid_change){
-            // set the value of the selected item to the Double value of the edited Cell,
-            // formatting it with the US currency
-            NumberFormat formatter = NumberFormat.getCurrencyInstance();
-            item_selected.setValue(formatter.format(Double.parseDouble(editedCell.getNewValue())));
-        }
-        else{
+        if(!was_changed){
             // refresh the old table view
             listItem.refresh();
         }
@@ -143,16 +135,8 @@ public class MenuController implements Initializable {
         // Get the item and the value of our selected cell
         Item item_selected = listItem.getSelectionModel().getSelectedItem();
         String new_SN = editedCell.getNewValue();
-
-        // determine whether the new SN is valid and if it does not match all other items
-        boolean valid_change = Item.ValidSN(new_SN);
-        int count = Item.NotMatchSN(listItem.getItems(),new_SN);
-
-        // set the Serial Number of the selected item to the new item, or refresh the (old) table
-        if(count == listItem.getItems().size() && valid_change){
-            item_selected.setS_number(new_SN);
-        }
-        else{
+        boolean was_changed = Item.changeSN(listItem.getItems(),item_selected,new_SN);
+        if(!was_changed){
             listItem.refresh();
         }
     }
@@ -167,17 +151,15 @@ public class MenuController implements Initializable {
 
     @FXML
     public void SearchButtonClicked(ActionEvent event){
-        ObservableList<Item> search_matches = FXCollections.observableArrayList();
         String search = SearchInput.getText().toLowerCase();
-        for(Item item: listItem.getItems()){
-            if(search.contains(item.getS_number().toLowerCase()) || search.contains(item.getName().toLowerCase())){
-                search_matches.add(item);
-            }
-        }
+        ObservableList<Item> search_matches = Item.SearchCriteria(search,listItem.getItems());
+
         listItemSearched.getItems().addAll(search_matches);
         listItem.setVisible(false);
         listItemSearched.setVisible(true);
         ResetTable.setDisable(false);
+        ValidateButton.setDisable(true);
+
     }
     @FXML
     public void ResetTableClicked(ActionEvent event){
@@ -186,8 +168,14 @@ public class MenuController implements Initializable {
         listItemSearched.setVisible(false);
         listItem.setVisible(true);
         ResetTable.setDisable(true);
+        ValidateButton.setDisable(false);
     }
-
+    @FXML
+    public void SaveButtonClicked(ActionEvent event){
+    }
+    @FXML
+    public void LoadButtonClicked(ActionEvent event){
+    }
     @FXML
     public void ExitAppClicked(ActionEvent event){
         Platform.exit();

@@ -5,6 +5,8 @@ class App{
     start()
 }
 
+App -- MenuController
+
 class MenuController{
 TextField MonetaryValueInput
 TextField SerialNumberInput
@@ -22,14 +24,21 @@ TableColumn<Item, String> names
 public void AddItemClicked(ActionEvent event)
 public void ValidateButtonPressed(ActionEvent event)
 public void CancelButtonPressed(ActionEvent event)
+
 public void changeNameEdit(TableColumn.CellEditEvent<Item,String> editedCell)
 public void changeValueEdit(TableColumn.CellEditEvent<Item,String> editedCell)
 public void changeSNEdit(TableColumn.CellEditEvent<Item,String> editedCell)
 
+public void deleteButtonClicked(ActionEvent event)
+
+public void SearchButtonClicked(ActionEvent event)
+public void ResetTableClicked(ActionEvent event)
 public void ExitAppClicked(ActionEvent event)
 
 initialize(URL location, ResourceBundle rb)
 }
+
+MenuController -- Item
 
 class Item{
 SimpleDoubleProperty value
@@ -42,7 +51,16 @@ public static boolean ValidName(String cur_name)
 public static boolean ValidSN(String cur_SN)
 public static boolean ValidPrice(String cur_price)
 public static int NotMatchSN
+
 public static ObservableList<Item> addItem
+
+public static ObservableList<Item> removeItems(ObservableList<Item> to_remove, ObservableList<Item> all)
+
+public static ObservableList<Item> SearchCriteria(String search, ObservableList<Item> items)
+
+public static boolean changeName(Item item_selected, String new_name)
+public static boolean changeValue(Item item_selected, String raw_number)
+public static boolean changeSN(ObservableList<Item> items, Item item_selected, String new_SN)
 
 getters()
 setters()
